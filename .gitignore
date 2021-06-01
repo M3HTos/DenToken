@@ -1,0 +1,6 @@
+node_modules
+artifacts
+cache
+hardhat.config.js
+package-lock.json
+package.json
