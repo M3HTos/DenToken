@@ -72,11 +72,6 @@ describe("Token contract", function() {
             expect(addr3Balance).to.equal(50);
             
         });
-
-        // Тест невозможности перевести деньги с аккаунта владельца Токена
-        it("Can't call transfer from owner by common user", async function() {
-            await expect(Token.connect(addr1).transfer(addr1.address, 50)).to.be.revertedWith("OnlyOwner function");
-        });
     });
     // Тест "админских" функций
     describe("Owner functions", function() {

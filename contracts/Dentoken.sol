@@ -1,8 +1,19 @@
 // SPDX-License-Identifier: Unlicensed
 
-pragma solidity ^0.7.3;
+pragma solidity ^0.8.5;
 
-contract DenToken {
+contract Guard {
+    bool internal lock;
+
+    modifier guarded() {
+        require(!lock, "Call is locked!");
+        lock = true;
+        _;
+        lock = false;
+    }
+}
+
+contract DenToken is Guard {
     string public name;
     string public symbol;
 
@@ -62,18 +73,14 @@ contract DenToken {
         emit Approval(_owner, _spender, _amount);
     }
 
-    function transfer(address _to, uint _amount) public onlyOwner {
-        _transfer(owner, _to, _amount);
-        emit Transfer(msg.sender, _to, _amount);
+    function transfer(address _to, uint _amount) public {
+        _transfer(msg.sender, _to, _amount);
     }
 
-    function transferFrom(address _from, address _to, uint _amount) public {
-        _transfer(_from, _to, _amount);
-        
+    function transferFrom(address _from, address _to, uint _amount) public {        
         require(allowed[_from][msg.sender] >= _amount, "Exceeds allowance");
         _approve(_from, msg.sender, allowed[_from][msg.sender] - _amount);
-        
-        emit Transfer(_from, _to, _amount);
+        _transfer(_from, _to, _amount);
     }
 
     function approve(address _spender, uint _amount) public {
@@ -82,13 +89,11 @@ contract DenToken {
 
     function increaseAllowance(address _spender, uint256 _addedValue) public {
         _approve(msg.sender, _spender, allowed[msg.sender][_spender] + _addedValue);
-        emit Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
     }
 
     function decreaseAllowance(address _spender, uint256 _subValue) public {
         require(allowed[msg.sender][_spender] >= _subValue, "Decreased allowance below zero");
         _approve(msg.sender, _spender, allowed[msg.sender][_spender] - _subValue);
-        emit Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
     }
 
     function mint(address _to, uint _amount) public onlyOwner {
